@@ -1,0 +1,19 @@
+[package]
+name = "calc"
+version = "0.1.0"
+authors = ["Sven Assmann <sven.assmann.it@gmail.com>"]
+edition = "2018"
+
+[[bin]]
+doc = false
+name = "calc"
+
+[build-dependencies]
+cfgrammar = "0.9"
+lrlex = "0.9"
+lrpar = "0.9"
+
+[dependencies]
+cfgrammar = "0.9"
+lrlex = "0.9"
+lrpar = "0.9"
