@@ -1,12 +1,12 @@
 [package]
-name = "calc"
+name = "sql-types"
 version = "0.1.0"
 authors = ["Sven Assmann <sven.assmann.it@gmail.com>"]
 edition = "2018"
 
 [[bin]]
 doc = false
-name = "calc"
+name = "sql-types"
 
 [build-dependencies]
 cfgrammar = "0.9"
@@ -17,3 +17,6 @@ lrpar = "0.9"
 cfgrammar = "0.9"
 lrlex = "0.9"
 lrpar = "0.9"
+
+[dev-dependencies]
+assert_matches = "1.4"
