@@ -6,6 +6,7 @@ Expr -> Result<Expr>:
 
 CreateTable -> Result<Expr>:
       'create_table' 'space' Identifier { Ok(Expr::CreateTable($3?)) }
+    | 'create_col_table' 'space' Identifier { Ok(Expr::CreateTable($3?)) }
     ;
 
 Identifier -> Result<Ident>:

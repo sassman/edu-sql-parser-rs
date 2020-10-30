@@ -84,6 +84,7 @@ mod test {
     #[test]
     fn should_parse_create_table() -> Result<()> {
         assert_matches!(parse_sql("CREATE TABLE x")?, Expr::CreateTable(_));
+        assert_matches!(parse_sql("create table x")?, Expr::CreateTable(_));
         Ok(())
     }
 
@@ -91,6 +92,19 @@ mod test {
     fn should_parse_create_table_with_special_identifier() -> Result<()> {
         assert_matches!(
             parse_sql("CREATE TABLE \"_abc!@#$%^\"")?,
+            Expr::CreateTable(_)
+        );
+        assert_matches!(
+            parse_sql("create table \"_abc!@#$%^\"")?,
+            Expr::CreateTable(_)
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn should_parse_create_column_table_with_special_identifier() -> Result<()> {
+        assert_matches!(
+            parse_sql("CREATE COLUMN TABLE \"_abc!@#$%^\"")?,
             Expr::CreateTable(_)
         );
         Ok(())
