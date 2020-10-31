@@ -2,10 +2,9 @@
 
 WIP: SQL Types transpiles `CREATE TABLE` SQL code into type definitions in other languages such as TypeScript or Rust. 
 
-## Supported Syntax
+## Syntax
 
-the following terms are supported, the format is EBNF
-
+Basic syntax rules:
 ```ebnf
 <digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
@@ -25,20 +24,125 @@ the following terms are supported, the format is EBNF
 
 <special_identifier> ::= <double_quotes><any_character>...<double_quotes>
 
-CREATE [ COLUMN ] TABLE <table_name> (<table_contents_source>, ...) <using_extended_storage_clause>
-
-<table_name> ::= [<schema_name>.]<identifier>
-
+// note: original definition is <unicode_name> instead of <identifier>
+<schema_name> ::= <identifier>
 ```
 
-## To be done
+### Create Table Syntax
 
-Following syntax tokens are yet to be implemented
+Currently Work in progress
 
-```ebnf
+```
+// simplified version
+CREATE [ <table_type> ] <table_name>
+ [<table_contents_source>
+ [<system_versioning_spec>]
+ [<application_time_period_configuration>]
+ [<bi_temporal_table_spec>]
+ [<with_association_clause>]
+ [<with_annotation_clause>]
+ [<with_mask_clause>]
+ [<logging_option>]
+ [<auto_merge_option>]
+ [<unload_priority_clause>]
+ [<schema_flexibility_option>]
+ [<partition_clause>]
+ [<persistent_memory_spec_clause>]
+ [<group_option_list>]
+ [<location_clause>]
+ [<replica_clause>]
+ [<global_temporary_option>]
+ [<series_clause>]
+ [<unused_retention_period_option>]
+ [<record_commit_timestamp_clause>]
+ [COMMENT <comment_string>]
+ [<numa_node_preference_clause>]
+ [<load_unit>]
 
+// simplified version
+<table_type> ::= [ COLUMN ] TABLE
+<table_name> ::= [<schema_name>.]<identifier>
 
-<table_contents_source> ::= (<table_element>, ...) | [(<column_name>, ...)]
+// simplified version
+<table_contents_source> ::=
+ (<table_element>, ...) [<with_association_clause>]
+
+<table_element> ::=
+   <column_definition> [ <column_constraint> ]
+ | <table_constraint>
+
+<column_definition> ::= <column_name> { <data_type> | <lob_data_type> }
+ [ <ddic_data_type> ]
+ [ <default_value_clause> ]
+ [ <clientside_encryption> ]
+ [ <col_gen_as_expression> | <col_gen_as_ident> ]
+ [ <col_calculated_field> ]
+ [ <schema_flexibility> ]
+ [ <fuzzy_search_index> ]
+ [ <fuzzy_search_mode> ]
+ [ <persistent_memory_spec_clause> ]
+ [ COMMENT <comment_string> ]
+ [ <load_unit> ]
+ [ <numa_node_preference_clause> ]
+  
+<column_name> ::= <identifier>
+
+<data_type> ::=
+ DATE
+ | TIME
+ | SECONDDATE
+ | TIMESTAMP
+ | TINYINT
+ | SMALLINT
+ | INT
+ | BIGINT
+ | SMALLDECIMAL
+ | REAL
+ | DOUBLE
+ | TEXT
+ | BINTEXT
+ | VARCHAR [ (<unsigned_integer>) ]
+ | NVARCHAR [ (<unsigned_integer>) ]
+ | ALPHANUM [ (<unsigned_integer>) ]
+ | VARBINARY [ (<unsigned_integer>) ]
+ | SHORTTEXT [ (<unsigned_integer>) ]
+ | DECIMAL [ (<unsigned_integer> [, <unsigned_integer> ]) ]
+ | FLOAT [ (<unsigned_integer>) ]
+ | BOOLEAN
+
+<default_value_clause> ::= DEFAULT <default_value_exp>
+
+<default_value_exp> ::=
+ NULL
+ | <string_literal>
+ | <signed_numeric_literal> <unsigned_numeric_literal>
+ | <datetime_value_function>
+
+<datetime_value_function> ::=
+ CURRENT_DATE
+ | CURRENT_TIME
+ | CURRENT_TIMESTAMP
+ | CURRENT_UTCDATE
+ | CURRENT_UTCTIME
+ | CURRENT_UTCTIMESTAMP
+ 
+<comment_string> ::= <string_literal>
+
+<column_constraint> ::=
+ NULL
+ | NOT NULL
+ | { HIDDEN | NOT HIDDEN }
+ | [ <constraint_name_definition> ] <unique_specification>
+ | [ <constraint_name_definition> ] <references_specification>
+ 
+<unique_specification> ::=
+ UNIQUE [ <unique_tree_type_index> ]
+ | PRIMARY KEY [ <unique_tree_type_index> | <unique_inverted_type_index> ]
+
+<unique_tree_type_index> ::= { BTREE | CPBTREE }
+<unique_inverted_type_index> ::= INVERTED [ <composite_type> ]
+<composite_type> ::= { HASH | VALUE | INDIVIDUAL }
+
 ```
 
 [hana/sql]: https://help.sap.com/doc/9b40bf74f8644b898fb07dabdd2a36ad/2.0.04/en-US/SAP_HANA_SQL_Reference_Guide_en.pdf
@@ -50,12 +154,9 @@ there is a little interactive shell to enter SQL and get parsed AST expressions 
 ```sh
 ❯ cargo run
 >>> x
-Parsing error at line 1 column 1. Repair sequences found:
-   1: Insert create_table, Insert space
->>> CREATE TABLE abc
+Parsing error at line 1 column 1. No repair sequences found.
+>>> CREATE TABLE abc(A INT)
 Expr (create table): abc
->>> CREATE TABLE "abc@#$%"
-Expr (create table): "abc@#$%"
 ```
 
 ## License

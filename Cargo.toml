@@ -17,6 +17,3 @@ lrpar = "0.9"
 cfgrammar = "0.9"
 lrlex = "0.9"
 lrpar = "0.9"
-
-[dev-dependencies]
-assert_matches = "1.4"
