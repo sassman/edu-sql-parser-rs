@@ -1,3 +1,4 @@
+use crate::code_gen_ts::{Visitable, Visitor};
 use lrpar::Span;
 use std::convert::TryFrom;
 use std::error::Error;
@@ -5,8 +6,15 @@ use std::error::Error;
 pub type Result<T> = std::result::Result<T, Box<dyn Error>>;
 
 #[derive(Debug, PartialEq)]
-pub enum Expr {
-    CreateTable { name: TableName, def: TableDef },
+pub struct CreateTableStmt {
+    pub name: TableName,
+    pub def: TableDef,
+}
+
+impl Visitable for CreateTableStmt {
+    fn accept(&self, visitor: &mut impl Visitor) {
+        visitor.visit_create_table_stmt(self);
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -26,10 +34,22 @@ impl TableDef {
     }
 }
 
+impl Visitable for TableDef {
+    fn accept(&self, visitor: &mut impl Visitor) {
+        visitor.visit_table(self);
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct ColumnDef {
     pub name: Ident,
     pub data_type: DataType,
+}
+
+impl Visitable for ColumnDef {
+    fn accept(&self, visitor: &mut impl Visitor) {
+        visitor.visit_column(self);
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -40,6 +60,18 @@ pub struct Ident {
 impl Ident {
     pub fn new(span: Span) -> Self {
         Self { span }
+    }
+}
+
+impl Visitable for Ident {
+    fn accept(&self, visitor: &mut impl Visitor) {
+        visitor.visit_ident(self);
+    }
+}
+
+impl From<&str> for Ident {
+    fn from(s: &str) -> Self {
+        Self::new(Span::new(0, s.len()))
     }
 }
 
@@ -56,6 +88,12 @@ pub enum DataType {
     Text,
     BinText,
     VarChar(Len),
+}
+
+impl Visitable for DataType {
+    fn accept(&self, visitor: &mut impl Visitor) {
+        visitor.visit_data_type(self);
+    }
 }
 
 #[derive(Debug, PartialEq)]

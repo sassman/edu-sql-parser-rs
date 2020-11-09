@@ -1,11 +1,12 @@
 mod ast;
+mod code_gen_ts;
 
 use std::io::{self, BufRead, Write};
 
 use lrlex::lrlex_mod;
 use lrpar::{lrpar_mod, NonStreamingLexer};
 
-use crate::ast::{Expr, TableName};
+use crate::ast::{CreateTableStmt, TableName};
 
 // Using `lrlex_mod!` brings the lexer for `*.l` into scope. By default the
 // module name will be `*_l` (i.e. the file name, minus any extensions,
@@ -15,6 +16,9 @@ lrlex_mod!("sql.l");
 // module name will be `*_y` (i.e. the file name, minus any extensions,
 // with a suffix of `_y`).
 lrpar_mod!("sql.y");
+
+pub use sql_l::*;
+pub use sql_y::*;
 
 fn main() {
     // Get the `LexerDef` for the `sql` language.
@@ -48,9 +52,9 @@ fn main() {
     }
 }
 
-fn eval<'input>(lexer: &dyn NonStreamingLexer<'input, u32>, e: Expr) {
+fn eval<'input>(lexer: &dyn NonStreamingLexer<'input, u32>, e: CreateTableStmt) {
     match e {
-        Expr::CreateTable { name, def: _ } => match name {
+        CreateTableStmt { name, def: _ } => match name {
             TableName::Name(name) => println!("Expr (create table): {}", lexer.span_str(name.span)),
             TableName::SchemaWithName(schema, name) => println!(
                 "Expr create table: {} in schema: {}",
@@ -85,14 +89,14 @@ mod test {
             };
 
             match e {
-                Ok(Expr::CreateTable {
+                Ok(CreateTableStmt {
                     name: TableName::Name(name),
                     def: TableDef { columns: _ },
                 }) => {
                     let name = lexer.span_str(name.span);
                     assert_eq!(name, $expected, "Table name did not match.");
                 }
-                Ok(Expr::CreateTable {
+                Ok(CreateTableStmt {
                     name: TableName::SchemaWithName(_schema, name),
                     def: TableDef { columns: _ },
                 }) => {

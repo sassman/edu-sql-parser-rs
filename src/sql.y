@@ -1,28 +1,26 @@
-%start Expr
+%start CreateTableStmt
 %%
-Expr -> Result<Expr>: CreateTable { $1 };
-
-CreateTable -> Result<Expr>:
+CreateTableStmt -> Result<CreateTableStmt>:
     'create_table' 'space' TableName '(' TableContentSource ')' {
-        Ok(Expr::CreateTable {
+        Ok(CreateTableStmt {
             name: $3?,
             def: TableDef::new($5?)
         })
     }
     | 'create_table' 'space' TableName 'space' '(' TableContentSource ')' {
-        Ok(Expr::CreateTable {
+        Ok(CreateTableStmt {
             name: $3?,
             def: TableDef::new($6?)
         })
     }
     | 'create_table' 'space' TableName 'space' '(' 'space' TableContentSource ')' {
-        Ok(Expr::CreateTable {
+        Ok(CreateTableStmt {
             name: $3?,
             def: TableDef::new($7?)
         })
     }
     | 'create_table' 'space' TableName 'space' '(' 'space' TableContentSource 'space' ')' {
-        Ok(Expr::CreateTable {
+        Ok(CreateTableStmt {
             name: $3?,
             def: TableDef::new($7?)
         })
