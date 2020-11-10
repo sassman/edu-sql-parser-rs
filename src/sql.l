@@ -1,5 +1,5 @@
 %%
-[Cc][Rr][Ee][Aa][Tt][Ee]\s[Tt][Aa][Bb][Ll][Ee]                              "create_table"
+[Cc][Rr][Ee][Aa][Tt][Ee]\s[Tt][Aa][Bb][Ll][Ee]\s+           "create_table"
 [Dd][Aa][Tt][Ee]                            "DATE"
 [Tt][Ii][Mm][Ee]                            "TIME"
 [Ss][Ee][Cc][Oo][Nn][Dd][Dd][Aa][Tt][Ee]    "SECONDDATE"
@@ -17,10 +17,10 @@
 [$]             '$'
 [#]             '#'
 ["]             '"'
-\s+             "space"
 [.]             '.'
 [(]             '('
 [)]             ')'
 [,]             ','
 
+[\s\n\t]        ;
 .               "any_character"

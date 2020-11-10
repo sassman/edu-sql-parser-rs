@@ -1,28 +1,10 @@
 %start CreateTableStmt
 %%
 CreateTableStmt -> Result<CreateTableStmt>:
-    'create_table' 'space' TableName '(' TableContentSource ')' {
+    'create_table' TableName '(' TableContentSource ')' {
         Ok(CreateTableStmt {
-            name: $3?,
-            def: TableDef::new($5?)
-        })
-    }
-    | 'create_table' 'space' TableName 'space' '(' TableContentSource ')' {
-        Ok(CreateTableStmt {
-            name: $3?,
-            def: TableDef::new($6?)
-        })
-    }
-    | 'create_table' 'space' TableName 'space' '(' 'space' TableContentSource ')' {
-        Ok(CreateTableStmt {
-            name: $3?,
-            def: TableDef::new($7?)
-        })
-    }
-    | 'create_table' 'space' TableName 'space' '(' 'space' TableContentSource 'space' ')' {
-        Ok(CreateTableStmt {
-            name: $3?,
-            def: TableDef::new($7?)
+            name: $2?,
+            def: TableDef::new($4?)
         })
     }
     ;
@@ -35,7 +17,6 @@ TableName -> Result<TableName>:
 TableContentSource -> Result<Vec<ColumnDef>>:
       TableElement { Ok(vec![$1?]) }
     | TableElement ',' TableElement { Ok(vec![$1?, $3?]) }
-    | TableElement ',' 'space' TableElement { Ok(vec![$1?, $4?]) }
     ;
 
 TableElement -> Result<ColumnDef>:
@@ -43,7 +24,7 @@ TableElement -> Result<ColumnDef>:
     ;
 
 ColumnDefinition -> Result<ColumnDef>:
-      ColumnName 'space' DataType { Ok(ColumnDef{ name: $1?, data_type: $3? }) }
+      ColumnName DataType { Ok(ColumnDef{ name: $1?, data_type: $2? }) }
     ;
 
 ColumnName -> Result<Ident>: Identifier { $1 };
@@ -59,11 +40,6 @@ DataType -> Result<DataType>:
   |   'TEXT' { Ok(DataType::Text) }
   |   'BINTEXT' { Ok(DataType::BinText) }
   |   'VARCHAR' '(' 'digit' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($3.map_err(|_| "<evaluation aborted>")?.span()))?)) }
-  |   'VARCHAR' 'space' '(' 'digit' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($4.map_err(|_| "<evaluation aborted>")?.span()))?)) }
-  |   'VARCHAR' 'space' '(' 'space' 'digit' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($5.map_err(|_| "<evaluation aborted>")?.span()))?)) }
-  |   'VARCHAR' 'space' '(' 'space' 'digit' 'space' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($5.map_err(|_| "<evaluation aborted>")?.span()))?)) }
-  |   'VARCHAR' 'space' '(' 'digit' 'space' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($4.map_err(|_| "<evaluation aborted>")?.span()))?)) }
-  |   'VARCHAR' '(' 'digit' 'space' ')' { Ok(DataType::VarChar(Len::try_from($lexer.span_str($3.map_err(|_| "<evaluation aborted>")?.span()))?)) }
   ;
 
 SchemaName -> Result<Ident>: Identifier { $1 };

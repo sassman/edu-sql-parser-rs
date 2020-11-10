@@ -1,6 +1,5 @@
 use crate::ast::{ColumnDef, CreateTableStmt, DataType, Ident, Len, TableDef, TableName};
 use lrpar::NonStreamingLexer;
-use std::borrow::Borrow;
 use std::io::Write;
 use std::marker::PhantomData;
 
@@ -18,7 +17,7 @@ pub trait Visitor {
 }
 
 pub struct TypeScriptGen<'i, T: NonStreamingLexer<'i, u32>> {
-    out: Box<dyn Write>,
+    out: Box<&'i mut dyn Write>,
     lexer: Box<T>,
     phantom: PhantomData<&'i T>,
 }
@@ -27,7 +26,7 @@ impl<'i, T> TypeScriptGen<'i, T>
 where
     T: NonStreamingLexer<'i, u32>,
 {
-    fn new(out: Box<dyn Write>, lexer: Box<T>) -> Self {
+    fn new(out: Box<&'i mut dyn Write>, lexer: Box<T>) -> Self {
         TypeScriptGen {
             out,
             lexer,
@@ -116,7 +115,7 @@ mod test {
     use crate::ast::Result;
     use crate::ast::TableName;
     use lrlex::lrlex_mod;
-    use lrpar::lrpar_mod;
+    use lrpar::{lrpar_mod, Span};
 
     lrlex_mod!("sql.l");
     lrpar_mod!("sql.y");
@@ -129,24 +128,30 @@ mod test {
         let (res, errs) = sql_y::parse(&lexer);
         let ast = res.unwrap().unwrap();
 
-        // let ast = CreateTableStmt {
-        //     name: TableName::Name(Ident::from("abc")),
-        //     def: TableDef {
-        //         columns: vec![ColumnDef {
-        //             name: Ident::from("a"),
-        //             data_type: DataType::Int,
-        //         }],
-        //     },
-        // };
+        let ast_expected = CreateTableStmt {
+            name: TableName::Name(Ident::new(Span::new(13, 16))),
+            def: TableDef {
+                columns: vec![
+                    ColumnDef {
+                        name: Ident::new(Span::new(18, 19)),
+                        data_type: DataType::Int,
+                    },
+                    ColumnDef {
+                        name: Ident::new(Span::new(25, 26)),
+                        data_type: DataType::VarChar(Len(10)),
+                    },
+                ],
+            },
+        };
+        assert_eq!(ast_expected, ast, "AST was not as expected.");
 
-        // let ast = res.unwrap().unwrap();
-
-        let stdout = std::io::stdout();
-        let b = Box::new(stdout);
+        let mut stdout = std::io::stdout();
         let lexer_box = Box::new(lexer);
-        let mut code_generator = TypeScriptGen::new(b, lexer_box);
+        let mut code_generator = TypeScriptGen::new(Box::new(&mut stdout), lexer_box);
 
         ast.accept(&mut code_generator);
+
+        // assert_eq!(buf.len(), 1);
 
         Ok(())
     }
